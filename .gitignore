@@ -1,0 +1,39 @@
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+*.temp
+
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+
+# PHP
+*.log
+vendor/
+composer.lock
+
+# Prestashop specific
+var/cache/*
+var/logs/*
+var/sessions/*
+override/*
+!override/classes/form/
+
+# Testing
+phpunit.xml
+.phpunit.result.cache
+
+# Local configuration
+config/settings.local.php
+.env.local
+.env.*.local
