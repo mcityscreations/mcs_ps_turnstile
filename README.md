@@ -1,0 +1,1 @@
+This module implements a custom solution to enable CLoudflare Turnstile inside Prestashop.
