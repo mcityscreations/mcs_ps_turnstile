@@ -65,8 +65,6 @@ class Mcs_Turnstile extends Module
             'displayBeforeBodyClosingTag',
             'displayCustomerRegisterForm',
             'displayCustomerRegisterFormTop',
-            'actionBeforeSubmitAccount',
-            'actionPasswordReset',
             'displayContactForm',
             'displayProductExtraContent',
         ];
@@ -268,7 +266,7 @@ class Mcs_Turnstile extends Module
         return json_decode(Configuration::get(self::FORMS_CONFIG), true) ?? [];
     }
 
-    public function displayCustomerAccountFormTop()
+    public function hookDisplayCustomerAccountFormTop()
     {
         if (!$this->isTurnstileEnabled()) {
             return '';
@@ -282,7 +280,7 @@ class Mcs_Turnstile extends Module
         return $this->renderTurnstileWidget();
     }
 
-    public function displayCustomerAccountForm()
+    public function hookDisplayCustomerAccountForm()
     {
         if (!$this->isTurnstileEnabled()) {
             return '';
@@ -296,7 +294,7 @@ class Mcs_Turnstile extends Module
         return $this->getTurnstileScript();
     }
 
-    public function displayLoginFormContent()
+    public function hookDisplayLoginFormContent()
     {
         if (!$this->isTurnstileEnabled()) {
             return '';
@@ -310,7 +308,7 @@ class Mcs_Turnstile extends Module
         return $this->renderTurnstileWidget() . $this->getTurnstileScript();
     }
 
-    public function displayCustomerRegisterFormTop()
+    public function hookDisplayCustomerRegisterFormTop()
     {
         if (!$this->isTurnstileEnabled()) {
             return '';
@@ -324,7 +322,21 @@ class Mcs_Turnstile extends Module
         return $this->renderTurnstileWidget() . $this->getTurnstileScript();
     }
 
-    public function displayContactForm()
+    public function hookDisplayCustomerRegisterForm()
+    {
+        if (!$this->isTurnstileEnabled()) {
+            return '';
+        }
+
+        $formsConfig = $this->getFormsConfig();
+        if (empty($formsConfig['registration'])) {
+            return '';
+        }
+
+        return $this->renderTurnstileWidget() . $this->getTurnstileScript();
+    }
+
+    public function hookDisplayContactForm()
     {
         if (!$this->isTurnstileEnabled()) {
             return '';
@@ -338,7 +350,7 @@ class Mcs_Turnstile extends Module
         return $this->renderTurnstileWidget() . $this->getTurnstileScript();
     }
 
-    public function displayBeforeBodyClosingTag()
+    public function hookDisplayBeforeBodyClosingTag()
     {
         if (!$this->isTurnstileEnabled()) {
             return '';
@@ -347,7 +359,7 @@ class Mcs_Turnstile extends Module
         return $this->getTurnstileScript();
     }
 
-    public function displayProductExtraContent()
+    public function hookDisplayProductExtraContent()
     {
         if (!$this->isTurnstileEnabled()) {
             return '';

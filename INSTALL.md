@@ -175,6 +175,7 @@ mcs_turnstile/
 
 ## Hooks Used
 
+- `displayCustomerAccountForm` - Login script
 - `displayCustomerAccountFormTop` - Login/Account form
 - `displayLoginFormContent` - Login page
 - `displayCustomerRegisterFormTop` - Registration form
@@ -182,7 +183,6 @@ mcs_turnstile/
 - `displayContactForm` - Contact form
 - `displayProductExtraContent` - Back in stock alert
 - `displayBeforeBodyClosingTag` - Turnstile script
-- `actionBeforeSubmitAccount` - Account form submission
 
 ## API Reference
 

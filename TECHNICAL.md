@@ -180,8 +180,6 @@ private function registerHooks()
         'displayBeforeBodyClosingTag',
         'displayCustomerRegisterForm',
         'displayCustomerRegisterFormTop',
-        'actionBeforeSubmitAccount',
-        'actionPasswordReset',
         'displayContactForm',
         'displayProductExtraContent',
     ];
