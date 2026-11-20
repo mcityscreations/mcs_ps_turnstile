@@ -119,7 +119,7 @@ Academic Free License 3.0 (AFL-3.0)
 
 ---
 
-**Current Version:** 1.0.0
+**Current Version:** 1.1.0
 **Prestashop Version:** 9.0.0+
 **Last Updated:** November 2024
 

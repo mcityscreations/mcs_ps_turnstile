@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - Unreleased
+
+### Added
+- Server-side Turnstile enforcement for login, registration, password reset, contact, newsletter subscription, and back-in-stock requests.
+- An upgrade routine to register the required hooks and install the new overrides.
+
+### Fixed
+- Validation now runs only when global Turnstile protection and the corresponding form are enabled.
+- The generic form data handler no longer blocks unrelated forms.
+
 ## [1.0.0] - 2024-11-19
 
 ### Added

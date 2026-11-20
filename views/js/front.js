@@ -68,5 +68,25 @@
         for (var j = 0; j < alerts.length; j++) {
             addWidget(alerts[j], 'back_in_stock', alerts[j].querySelector('.js-mailalert-add'));
         }
+
+        if (window.jQuery && window.jQuery.ajaxPrefilter) {
+            window.jQuery.ajaxPrefilter(function (options) {
+                if (!options.url || options.url.indexOf('ps_emailalerts') === -1 || options.url.indexOf('process=add') === -1) {
+                    return;
+                }
+
+                var alert = document.querySelector('.js-mailalert');
+                var tokenField = alert && alert.querySelector('input[name="cf-turnstile-response"]');
+                if (!tokenField || !tokenField.value) {
+                    return;
+                }
+
+                if (typeof options.data === 'string') {
+                    options.data += (options.data ? '&' : '') + 'cf-turnstile-response=' + encodeURIComponent(tokenField.value);
+                } else if (options.data && typeof options.data === 'object') {
+                    options.data['cf-turnstile-response'] = tokenField.value;
+                }
+            });
+        }
     }
 })();

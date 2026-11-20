@@ -217,5 +217,5 @@ See [IMPLEMENTATION.md - Customization](IMPLEMENTATION.md#customization) section
 
 **Congratulations!** Your Prestashop store is now protected by Cloudflare Turnstile! 🎉
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Last Updated:** November 2024

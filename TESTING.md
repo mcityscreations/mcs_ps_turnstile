@@ -448,19 +448,39 @@ Complete testing procedures to verify the module works correctly.
 
 **Steps:**
 1. Navigate to registration form
-2. Enter invalid data:
+2. Complete Turnstile
+3. Enter invalid data:
    - Email: (leave empty)
    - Password: "123" (too short)
-3. Try to submit
-4. Observe validation
+4. Try to submit
+5. Observe validation
 
 **Expected Result:**
 - Prestashop validation catches errors (not Turnstile)
 - Appropriate error messages shown
-- Turnstile validation occurs before Prestashop validation
-- Form is not submitted to backend
+- The customer account is not created
+- The invalid submission is rejected
 
 **Result:** ☐ PASS ☐ FAIL
+
+---
+
+## Server-Side Enforcement Tests
+
+For each form, enable global Turnstile and select that form in module
+configuration. Submit without completing the widget and confirm the request is
+rejected before its side effect:
+
+- **Login:** no customer session is opened.
+- **Registration:** no customer account is created.
+- **Password reset:** no reset email is sent and no password is changed.
+- **Contact:** no contact message is sent; a PrestaShop error is displayed.
+- **Newsletter:** no subscription is recorded; unsubscription remains available.
+- **Back in stock:** no alert is recorded and the AJAX response displays an error.
+
+Then disable the global setting or deselect one form and confirm that form is
+not rejected by Turnstile. Repeat with a valid token and confirm normal
+processing succeeds.
 
 ---
 
@@ -827,5 +847,5 @@ _______________________________________________
 
 ---
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Last Updated:** November 2024

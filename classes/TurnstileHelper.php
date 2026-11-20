@@ -26,12 +26,7 @@ class TurnstileHelper
      */
     public function isFormProtected($formKey)
     {
-        if (!$this->isTurnstileEnabled()) {
-            return false;
-        }
-
-        $formsConfig = $this->module->getFormsConfig();
-        return isset($formsConfig[$formKey]) && (int)$formsConfig[$formKey] === 1;
+        return $this->module->isFormProtected($formKey);
     }
 
     /**

@@ -23,6 +23,7 @@ The module uses a hook-based architecture to integrate with Prestashop forms wit
 | `getContent()` | Admin configuration page |
 | `isEnabled()` | Check if module is active |
 | `getFormsConfig()` | Get protected forms |
+| `isFormProtected($key)` | Check global and per-form settings |
 | `validateTurnstile()` | Server-side validation |
 
 ### 2. Helper Class (`classes/TurnstileHelper.php`)
@@ -49,7 +50,7 @@ The module uses a hook-based architecture to integrate with Prestashop forms wit
 - Token verification response
 
 **Endpoints:**
-- `POST /module/mcs_turnstile/validation` - Validate Turnstile token
+- `POST /module/mcs_turnstile/validation` - Validate a token for a protected form
 
 ### 4. Form Overrides (`override/classes/form/`)
 
@@ -58,8 +59,11 @@ The module uses a hook-based architecture to integrate with Prestashop forms wit
 - Maintain backward compatibility
 
 **Files:**
-- `CustomerAccountForm.php` - Login/Account forms
-- `FormDataHandler.php` - Generic form data handling
+- `CustomerForm.php` - Registration, before customer persistence
+- `CustomerLoginForm.php` - Login, before authentication
+- `PasswordController.php` - Password reset, before email or password changes
+- `CustomerAccountForm.php` - Legacy compatibility, when that core class exists
+- `FormDataHandler.php` - No generic token validation; unrelated forms remain unaffected
 
 ## Integration Points
 
@@ -70,26 +74,23 @@ The module uses a hook-based architecture to integrate with Prestashop forms wit
 
 The integration script targets the Classic theme's login, registration,
 password-reset, contact, newsletter, and back-in-stock form markup. The
-`ps_emailalerts` back-in-stock request is AJAX-based and requires separate
-server-side token verification.
+`ps_emailalerts` back-in-stock request is AJAX-based; the script forwards its
+token and the dispatcher hook verifies it before the module processes the request.
 
 ## Data Flow
 
 ```
-For forms with server-side integration (currently customer registration):
+For each form selected in configuration:
 
 User completes widget
         ↓
 Turnstile API returns a cf-turnstile-response token
         ↓
-Form submits the token
+The form submits the token
         ↓
 Server calls Cloudflare Siteverify
         ↓
-Accept or reject the form submission
-
-The other widgets currently provide a challenge UI but do not yet enforce
-server-side verification in their respective form handlers.
+Accept the submission or return a form-specific error before processing
 ```
 
 ## Security Implementation
@@ -162,6 +163,8 @@ private function registerHooks()
         'displayBeforeBodyClosingTag',
         'displayCustomerRegisterForm',
         'displayCustomerRegisterFormTop',
+        'actionDispatcher',
+        'actionNewsletterRegistrationBefore',
     ];
 }
 ```
@@ -172,28 +175,27 @@ private function registerHooks()
 
 **Login Form**
 - Widget: `#login-form` via `views/js/front.js`
-- Server-side validation: Not implemented for `CustomerLoginForm`
+- Server-side validation: `CustomerLoginForm::submit()` runs before authentication
 
 **Registration Form**
 - Widget: `displayCustomerAccountForm` with a front-end fallback
-- Validation: `CustomerAccountForm::validate()`
-- Flow: The token is posted with registration form data and checked by the override
+- Server-side validation: `CustomerForm::submit()` runs before customer persistence
 
 **Contact Form**
 - Widget: Contact form containing `submitMessage` via `views/js/front.js`
-- Server-side validation: Not implemented for the contact form module
+- Server-side validation: `actionDispatcher` adds a controller error before the contact module sends
 
 **Newsletter Form**
 - Widget: `.block_newsletter form` via `views/js/front.js`
-- Server-side validation: Not implemented for the newsletter module
+- Server-side validation: `actionNewsletterRegistrationBefore` rejects subscriptions; unsubscriptions are unaffected
 
 **Password Reset**
 - Widget: Password-reset form via `views/js/front.js`
-- Server-side validation: Not implemented for the password-reset endpoint
+- Server-side validation: `PasswordController::postProcess()` runs before reset email or password update
 
 **Back in Stock Alert**
 - Widget: `.js-mailalert` via `views/js/front.js`
-- Server-side validation: Requires integration with the AJAX endpoint in `ps_emailalerts`
+- Server-side validation: `actionDispatcher` verifies the AJAX request before `ps_emailalerts::processAdd()`
 
 ## Error Handling
 
@@ -368,5 +370,5 @@ var_dump($result);
 
 ---
 
-**Version**: 1.0.0
+**Version**: 1.1.0
 **Last Updated**: 2024-11-19

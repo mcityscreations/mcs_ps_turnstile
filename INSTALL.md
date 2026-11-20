@@ -68,6 +68,9 @@ A production-ready Prestashop 9 module that integrates Cloudflare Turnstile CAPT
 6. Select which forms to protect by checking the boxes
 7. Click **Save**
 
+For an existing installation, upgrade the module to version 1.1.0 and clear the
+PrestaShop cache so the new hooks and form overrides are loaded.
+
 ## Configuration Options
 
 ### Module Settings
@@ -98,7 +101,7 @@ You can selectively protect the following forms:
 ### For Store Owner
 - Module hooks into Prestashop form submission points
 - Automatically validates Turnstile tokens server-side
-- Prevents spam and bot attacks
+- Rejects protected submissions that fail verification
 - Configuration is centralized in Prestashop admin
 - No external dependencies or database migrations
 
@@ -180,8 +183,9 @@ The module loads `views/js/front.js` and the Turnstile API through
 login, registration, password-reset, contact, newsletter, and back-in-stock
 forms when each form is enabled in the module configuration.
 
-The back-in-stock alert is submitted asynchronously by `ps_emailalerts`; showing
-a widget does not by itself make that module's server endpoint verify the token.
+The back-in-stock alert is submitted asynchronously by `ps_emailalerts`; the
+module forwards its token with the request and verifies it before the alert is
+recorded.
 
 ## API Reference
 
@@ -282,4 +286,4 @@ Academic Free License 3.0 (AFL-3.0)
 ---
 
 **Last Updated**: 2024-11-19
-**Version**: 1.0.0
+**Version**: 1.1.0

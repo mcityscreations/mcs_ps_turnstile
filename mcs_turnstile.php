@@ -3,7 +3,7 @@
  * Cloudflare Turnstile Integration Module for Prestashop
  *
  * @author MCS - Multicreations Services
- * @version 1.0.0
+ * @version 1.1.0
  * @license Academic Free License 3.0
  */
 
@@ -22,7 +22,7 @@ class Mcs_Turnstile extends Module
     {
         $this->name = 'mcs_turnstile';
         $this->tab = 'security';
-        $this->version = '1.0.0';
+        $this->version = '1.1.0';
         $this->author = 'MCS - Mcitys';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = ['min' => '8.0.0', 'max' => _PS_VERSION_];
@@ -43,7 +43,10 @@ class Mcs_Turnstile extends Module
             return false;
         }
 
-        $this->registerHooks();
+        if (!$this->registerHooks()) {
+            return false;
+        }
+
         $this->setDefaultConfiguration();
 
         return true;
@@ -65,6 +68,8 @@ class Mcs_Turnstile extends Module
             'displayBeforeBodyClosingTag',
             'displayCustomerRegisterForm',
             'displayCustomerRegisterFormTop',
+            'actionDispatcher',
+            'actionNewsletterRegistrationBefore',
         ];
 
         foreach ($hooks as $hook) {
@@ -262,6 +267,64 @@ class Mcs_Turnstile extends Module
     public function getFormsConfig()
     {
         return json_decode(Configuration::get(self::FORMS_CONFIG), true) ?? [];
+    }
+
+    public function isFormProtected($formKey)
+    {
+        if (!$this->isTurnstileEnabled()) {
+            return false;
+        }
+
+        $formsConfig = $this->getFormsConfig();
+
+        return isset($formsConfig[$formKey]) && (int)$formsConfig[$formKey] === 1;
+    }
+
+    public function hookActionNewsletterRegistrationBefore($params)
+    {
+        if (
+            strtoupper($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST'
+            || !Tools::isSubmit('submitNewsletter')
+            || !isset($params['action'])
+            || (int)$params['action'] !== 0
+            || !$this->isFormProtected('newsletter')
+        ) {
+            return;
+        }
+
+        if (!self::validateTurnstile()) {
+            $params['hookError'] = $this->l('Turnstile verification failed. Please try again.');
+        }
+    }
+
+    public function hookActionDispatcher($params)
+    {
+        if (strtoupper($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+            return;
+        }
+
+        $controllerClass = strtolower($params['controller_class'] ?? '');
+        if (
+            Tools::isSubmit('submitMessage')
+            && strpos($controllerClass, 'contactcontroller') !== false
+            && $this->isFormProtected('contact')
+            && !self::validateTurnstile()
+        ) {
+            $this->context->controller->errors[] = $this->l('Turnstile verification failed. Please try again.');
+        }
+
+        if (
+            !empty($params['is_module'])
+            && $controllerClass === 'ps_emailalertsactionsmodulefrontcontroller'
+            && Tools::getValue('process') === 'add'
+            && $this->isFormProtected('back_in_stock')
+            && !self::validateTurnstile()
+        ) {
+            exit(json_encode([
+                'error' => true,
+                'message' => $this->l('Turnstile verification failed. Please try again.'),
+            ]));
+        }
     }
 
     private function isRegistrationPage()

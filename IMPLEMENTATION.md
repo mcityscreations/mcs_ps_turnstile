@@ -52,7 +52,8 @@
 3. Complete verification
 4. Submit the login form
 
-**Note:** The login form's server-side validation is not implemented by the current module.
+**Server-side enforcement:** The login form override verifies Turnstile before
+PrestaShop authenticates the customer.
 
 ### 2. Registration Form
 
@@ -88,7 +89,8 @@ adds it to `#customer-form` if the theme does not render that hook.
 3. Complete verification
 4. Submit the form
 
-**Note:** The password-reset endpoint's server-side validation is not implemented by the current module.
+**Server-side enforcement:** The password controller verifies Turnstile before
+sending a reset link or updating a password.
 
 ### 4. Contact Form
 
@@ -107,7 +109,8 @@ adds it to `#customer-form` if the theme does not render that hook.
 4. Complete verification
 5. Submit the form
 
-**Note:** The contact module's server-side validation is not implemented by the current module.
+**Server-side enforcement:** The dispatcher hook adds a PrestaShop controller
+error before the contact module can send the message.
 
 ### 5. Newsletter Subscription
 
@@ -125,7 +128,8 @@ adds it to `#customer-form` if the theme does not render that hook.
 3. Complete verification
 4. Submit the form
 
-**Note:** The newsletter module's server-side validation is not implemented by the current module.
+**Server-side enforcement:** The newsletter registration hook rejects an
+unverified subscription before it is added. Unsubscription is not blocked.
 
 ### 6. Back in Stock Alert
 
@@ -137,8 +141,8 @@ adds it to `#customer-form` if the theme does not render that hook.
 
 **Integration:** Inserted into `.js-mailalert` by `views/js/front.js`
 
-**Note:** `ps_emailalerts` submits this request asynchronously. Server-side
-Turnstile verification must also be added to that module's endpoint.
+**Server-side enforcement:** The module forwards the widget token with the
+AJAX request and rejects it before `ps_emailalerts` records the alert.
 
 **Test:**
 1. Find out-of-stock product
@@ -588,5 +592,5 @@ A: Yes - see Customization section above.
 
 ---
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Last Updated:** 2024-11-19
