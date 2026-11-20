@@ -266,9 +266,21 @@ class Mcs_Turnstile extends Module
         return json_decode(Configuration::get(self::FORMS_CONFIG), true) ?? [];
     }
 
+    private function isRegistrationPage()
+    {
+        $controller = $this->context->controller;
+        $pageName = isset($controller->php_self) ? $controller->php_self : '';
+
+        return $pageName === 'registration' || (int)Tools::getValue('create_account') === 1;
+    }
+
     public function hookDisplayCustomerAccountFormTop()
     {
         if (!$this->isTurnstileEnabled()) {
+            return '';
+        }
+
+        if ($this->isRegistrationPage()) {
             return '';
         }
 
@@ -287,11 +299,12 @@ class Mcs_Turnstile extends Module
         }
 
         $formsConfig = $this->getFormsConfig();
-        if (empty($formsConfig['login'])) {
+        $formKey = $this->isRegistrationPage() ? 'registration' : 'login';
+        if (empty($formsConfig[$formKey])) {
             return '';
         }
 
-        return $this->getTurnstileScript();
+        return $this->renderTurnstileWidget();
     }
 
     public function hookDisplayLoginFormContent()
@@ -305,7 +318,7 @@ class Mcs_Turnstile extends Module
             return '';
         }
 
-        return $this->renderTurnstileWidget() . $this->getTurnstileScript();
+        return $this->renderTurnstileWidget();
     }
 
     public function hookDisplayCustomerRegisterFormTop()
@@ -319,7 +332,7 @@ class Mcs_Turnstile extends Module
             return '';
         }
 
-        return $this->renderTurnstileWidget() . $this->getTurnstileScript();
+        return $this->renderTurnstileWidget();
     }
 
     public function hookDisplayCustomerRegisterForm()
@@ -333,7 +346,7 @@ class Mcs_Turnstile extends Module
             return '';
         }
 
-        return $this->renderTurnstileWidget() . $this->getTurnstileScript();
+        return $this->renderTurnstileWidget();
     }
 
     public function hookDisplayContactForm()
@@ -347,7 +360,7 @@ class Mcs_Turnstile extends Module
             return '';
         }
 
-        return $this->renderTurnstileWidget() . $this->getTurnstileScript();
+        return $this->renderTurnstileWidget();
     }
 
     public function hookDisplayBeforeBodyClosingTag()

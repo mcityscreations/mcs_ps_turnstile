@@ -175,8 +175,8 @@ mcs_turnstile/
 
 ## Hooks Used
 
-- `displayCustomerAccountForm` - Login script
-- `displayCustomerAccountFormTop` - Login/Account form
+- `displayCustomerAccountForm` - Login and registration forms
+- `displayCustomerAccountFormTop` - Password reset form
 - `displayLoginFormContent` - Login page
 - `displayCustomerRegisterFormTop` - Registration form
 - `displayCustomerRegisterForm` - Registration form bottom

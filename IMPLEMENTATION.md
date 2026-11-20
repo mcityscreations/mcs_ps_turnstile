@@ -42,9 +42,9 @@
 
 **URL:** `/customer/login` or `/my-account`
 
-**Widget Placement:** Above login button
+**Widget Placement:** Inside the login form
 
-**Integration:** Automatic via hook `displayLoginFormContent`
+**Integration:** Automatic via hook `displayCustomerAccountForm`
 
 **Test:**
 1. Go to login page
@@ -58,9 +58,9 @@
 
 **URL:** `/customer/register` or `/register`
 
-**Widget Placement:** At top of registration form
+**Widget Placement:** Inside the registration form
 
-**Integration:** Automatic via hook `displayCustomerRegisterFormTop`
+**Integration:** Automatic via hook `displayCustomerAccountForm`
 
 **Test:**
 1. Go to registration page

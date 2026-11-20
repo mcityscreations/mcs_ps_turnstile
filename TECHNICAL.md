@@ -63,14 +63,14 @@ The module uses a hook-based architecture to integrate with Prestashop forms wit
 
 ## Integration Points
 
-### Hook: displayLoginFormContent
-**Location:** Customer login page
-**Purpose:** Display Turnstile widget before login form
+### Hook: displayCustomerAccountForm
+**Location:** Customer login and registration pages
+**Purpose:** Display Turnstile widget inside the active customer form
 **Called On:** Page load
 
-### Hook: displayCustomerRegisterFormTop
-**Location:** Customer registration page
-**Purpose:** Display Turnstile widget at form top
+### Hook: displayCustomerAccountFormTop
+**Location:** Customer password reset page
+**Purpose:** Display the password reset widget
 **Called On:** Page load
 
 ### Hook: displayContactForm
