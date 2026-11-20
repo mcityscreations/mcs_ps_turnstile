@@ -65,8 +65,6 @@ class Mcs_Turnstile extends Module
             'displayBeforeBodyClosingTag',
             'displayCustomerRegisterForm',
             'displayCustomerRegisterFormTop',
-            'displayContactForm',
-            'displayProductExtraContent',
         ];
 
         foreach ($hooks as $hook) {
@@ -281,7 +279,12 @@ class Mcs_Turnstile extends Module
         }
 
         if ($this->isRegistrationPage()) {
-            return '';
+            $formsConfig = $this->getFormsConfig();
+            if (empty($formsConfig['registration'])) {
+                return '';
+            }
+
+            return $this->renderRegistrationWidgetFallback();
         }
 
         $formsConfig = $this->getFormsConfig();
@@ -305,6 +308,30 @@ class Mcs_Turnstile extends Module
         }
 
         return $this->renderTurnstileWidget();
+    }
+
+    private function renderRegistrationWidgetFallback()
+    {
+        $html = '<div id="mcs-turnstile-registration-fallback">';
+        $html .= $this->renderTurnstileWidget();
+        $html .= '</div>';
+        $html .= '<script>';
+        $html .= '(function() {';
+        $html .= 'var moveWidget = function() {';
+        $html .= 'var fallback = document.getElementById("mcs-turnstile-registration-fallback");';
+        $html .= 'var form = document.querySelector("#customer-form, .js-customer-form");';
+        $html .= 'if (!fallback || !form) { return; }';
+        $html .= 'if (form.querySelector(".cf-turnstile")) { fallback.remove(); return; }';
+        $html .= 'var footer = form.querySelector(".form-footer");';
+        $html .= 'form.insertBefore(fallback, footer);';
+        $html .= '};';
+        $html .= 'if (document.readyState === "loading") {';
+        $html .= 'document.addEventListener("DOMContentLoaded", moveWidget);';
+        $html .= '} else { moveWidget(); }';
+        $html .= '})();';
+        $html .= '</script>';
+
+        return $html;
     }
 
     public function hookDisplayLoginFormContent()
@@ -374,16 +401,7 @@ class Mcs_Turnstile extends Module
 
     public function hookDisplayProductExtraContent()
     {
-        if (!$this->isTurnstileEnabled()) {
-            return '';
-        }
-
-        $formsConfig = $this->getFormsConfig();
-        if (empty($formsConfig['back_in_stock'])) {
-            return '';
-        }
-
-        return $this->renderTurnstileWidget();
+        return [];
     }
 
     private function renderTurnstileWidget()
@@ -395,7 +413,17 @@ class Mcs_Turnstile extends Module
 
     private function getTurnstileScript()
     {
-        return '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>';
+        $frontConfig = json_encode(
+            [
+                'siteKey' => (string)Configuration::get(self::SITE_KEY_CONFIG),
+                'forms' => $this->getFormsConfig(),
+            ],
+            JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+        );
+
+        return '<script>window.mcsTurnstileConfig = ' . $frontConfig . ';</script>'
+            . '<script src="' . $this->_path . 'views/js/front.js"></script>'
+            . '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>';
     }
 
     public static function validateTurnstile()

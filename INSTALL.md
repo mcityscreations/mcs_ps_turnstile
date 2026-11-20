@@ -173,16 +173,15 @@ mcs_turnstile/
             └── configuration.tpl      # Admin config template
 ```
 
-## Hooks Used
+## Front-end Integration
 
-- `displayCustomerAccountForm` - Login and registration forms
-- `displayCustomerAccountFormTop` - Password reset form
-- `displayLoginFormContent` - Login page
-- `displayCustomerRegisterFormTop` - Registration form
-- `displayCustomerRegisterForm` - Registration form bottom
-- `displayContactForm` - Contact form
-- `displayProductExtraContent` - Back in stock alert
-- `displayBeforeBodyClosingTag` - Turnstile script
+The module loads `views/js/front.js` and the Turnstile API through
+`displayBeforeBodyClosingTag`. The script places a widget in the Classic theme's
+login, registration, password-reset, contact, newsletter, and back-in-stock
+forms when each form is enabled in the module configuration.
+
+The back-in-stock alert is submitted asynchronously by `ps_emailalerts`; showing
+a widget does not by itself make that module's server endpoint verify the token.
 
 ## API Reference
 

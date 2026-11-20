@@ -63,51 +63,33 @@ The module uses a hook-based architecture to integrate with Prestashop forms wit
 
 ## Integration Points
 
-### Hook: displayCustomerAccountForm
-**Location:** Customer login and registration pages
-**Purpose:** Display Turnstile widget inside the active customer form
-**Called On:** Page load
-
-### Hook: displayCustomerAccountFormTop
-**Location:** Customer password reset page
-**Purpose:** Display the password reset widget
-**Called On:** Page load
-
-### Hook: displayContactForm
-**Location:** Contact page
-**Purpose:** Add Turnstile to contact form
-**Called On:** Page load
-
-### Hook: displayProductExtraContent
-**Location:** Product page
-**Purpose:** Protect back-in-stock alerts
-**Called On:** Product display
-
 ### Hook: displayBeforeBodyClosingTag
 **Location:** All pages
-**Purpose:** Load Turnstile JavaScript library
+**Purpose:** Load the integration script and Turnstile JavaScript library
 **Called On:** Every page load
+
+The integration script targets the Classic theme's login, registration,
+password-reset, contact, newsletter, and back-in-stock form markup. The
+`ps_emailalerts` back-in-stock request is AJAX-based and requires separate
+server-side token verification.
 
 ## Data Flow
 
 ```
-User Form Submission
+For forms with server-side integration (currently customer registration):
+
+User completes widget
         ↓
-Client-side: Turnstile widget validates user
+Turnstile API returns a cf-turnstile-response token
         ↓
-Turnstile API: Returns cf-turnstile-response token
+Form submits the token
         ↓
-Form submitted with token in POST data
+Server calls Cloudflare Siteverify
         ↓
-Server: validateTurnstile() reads token
-        ↓
-Call Cloudflare API with token + secret key
-        ↓
-Cloudflare verifies token authenticity
-        ↓
-Server: Accept or reject form submission
-        ↓
-Continue normal Prestashop form processing
+Accept or reject the form submission
+
+The other widgets currently provide a challenge UI but do not yet enforce
+server-side verification in their respective form handlers.
 ```
 
 ## Security Implementation
@@ -180,8 +162,6 @@ private function registerHooks()
         'displayBeforeBodyClosingTag',
         'displayCustomerRegisterForm',
         'displayCustomerRegisterFormTop',
-        'displayContactForm',
-        'displayProductExtraContent',
     ];
 }
 ```
@@ -191,34 +171,29 @@ private function registerHooks()
 ### By Form Type
 
 **Login Form**
-- Hook: `displayLoginFormContent`
-- Validation: `CustomerAccountForm::validate()`
-- Fallback: `displayBeforeBodyClosingTag`
+- Widget: `#login-form` via `views/js/front.js`
+- Server-side validation: Not implemented for `CustomerLoginForm`
 
 **Registration Form**
-- Hook: `displayCustomerRegisterFormTop`
+- Widget: `displayCustomerAccountForm` with a front-end fallback
 - Validation: `CustomerAccountForm::validate()`
-- Flow: Widget displays, then form validates
+- Flow: The token is posted with registration form data and checked by the override
 
 **Contact Form**
-- Hook: `displayContactForm`
-- Validation: Override hook in module
-- Flow: Automatic integration
+- Widget: Contact form containing `submitMessage` via `views/js/front.js`
+- Server-side validation: Not implemented for the contact form module
 
 **Newsletter Form**
-- Hook: `displayBeforeBodyClosingTag`
-- Validation: Requires custom template modification
-- Status: Partial (needs theme integration)
+- Widget: `.block_newsletter form` via `views/js/front.js`
+- Server-side validation: Not implemented for the newsletter module
 
 **Password Reset**
-- Hook: `displayCustomerAccountFormTop`
-- Validation: `CustomerAccountForm::validate()`
-- Flow: Protected by account form logic
+- Widget: Password-reset form via `views/js/front.js`
+- Server-side validation: Not implemented for the password-reset endpoint
 
 **Back in Stock Alert**
-- Hook: `displayProductExtraContent`
-- Validation: Override module hook
-- Flow: Widget displays with product info
+- Widget: `.js-mailalert` via `views/js/front.js`
+- Server-side validation: Requires integration with the AJAX endpoint in `ps_emailalerts`
 
 ## Error Handling
 

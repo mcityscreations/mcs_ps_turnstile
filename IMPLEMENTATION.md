@@ -44,13 +44,15 @@
 
 **Widget Placement:** Inside the login form
 
-**Integration:** Automatic via hook `displayCustomerAccountForm`
+**Integration:** Inserted into `#login-form` by `views/js/front.js`
 
 **Test:**
 1. Go to login page
 2. See Turnstile widget
-3. Try login without verification → Should fail
-4. Complete verification → Can login
+3. Complete verification
+4. Submit the login form
+
+**Note:** The login form's server-side validation is not implemented by the current module.
 
 ### 2. Registration Form
 
@@ -60,7 +62,8 @@
 
 **Widget Placement:** Inside the registration form
 
-**Integration:** Automatic via hook `displayCustomerAccountForm`
+**Integration:** The customer form hook renders the widget; the front-end script
+adds it to `#customer-form` if the theme does not render that hook.
 
 **Test:**
 1. Go to registration page
@@ -77,13 +80,15 @@
 
 **Widget Placement:** At top of password reset form
 
-**Integration:** Automatic via hook `displayCustomerAccountFormTop`
+**Integration:** Inserted into the password-reset forms by `views/js/front.js`
 
 **Test:**
 1. Go to login → Click "Forgot Password"
 2. See Turnstile widget
 3. Complete verification
-4. Submit → Should work
+4. Submit the form
+
+**Note:** The password-reset endpoint's server-side validation is not implemented by the current module.
 
 ### 4. Contact Form
 
@@ -93,14 +98,16 @@
 
 **Widget Placement:** In contact form
 
-**Integration:** Automatic via hook `displayContactForm`
+**Integration:** Inserted into the `submitMessage` form by `views/js/front.js`
 
 **Test:**
 1. Go to Contact page
 2. Fill contact form
 3. See Turnstile widget
 4. Complete verification
-5. Submit → Email sent
+5. Submit the form
+
+**Note:** The contact module's server-side validation is not implemented by the current module.
 
 ### 5. Newsletter Subscription
 
@@ -110,13 +117,15 @@
 
 **URL:** Varies (usually footer or dedicated page)
 
-**Integration:** Via JavaScript hook `displayBeforeBodyClosingTag`
+**Integration:** Inserted into `.block_newsletter form` by `views/js/front.js`
 
 **Test:**
 1. Go to footer or newsletter page
 2. See Turnstile widget
 3. Complete verification
-4. Subscribe → Email confirmed
+4. Submit the form
+
+**Note:** The newsletter module's server-side validation is not implemented by the current module.
 
 ### 6. Back in Stock Alert
 
@@ -126,14 +135,17 @@
 
 **URL:** Product pages for out of stock items
 
-**Integration:** Automatic via hook `displayProductExtraContent`
+**Integration:** Inserted into `.js-mailalert` by `views/js/front.js`
+
+**Note:** `ps_emailalerts` submits this request asynchronously. Server-side
+Turnstile verification must also be added to that module's endpoint.
 
 **Test:**
 1. Find out-of-stock product
 2. See "Notify me" button
-3. Click → See Turnstile widget
+3. See the Turnstile widget beside the alert controls
 4. Complete verification
-5. Submit → Alert registered
+5. Submit the alert request
 
 ---
 
