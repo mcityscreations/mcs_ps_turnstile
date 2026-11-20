@@ -185,7 +185,8 @@ forms when each form is enabled in the module configuration.
 
 The back-in-stock alert is submitted asynchronously by `ps_emailalerts`; the
 module forwards its token with the request and verifies it before the alert is
-recorded.
+recorded. The widget is refreshed after a token-bearing request, so a failed
+alert submission can be retried with a fresh token.
 
 ## API Reference
 

@@ -69,24 +69,55 @@
             addWidget(alerts[j], 'back_in_stock', alerts[j].querySelector('.js-mailalert-add'));
         }
 
-        if (window.jQuery && window.jQuery.ajaxPrefilter) {
-            window.jQuery.ajaxPrefilter(function (options) {
-                if (!options.url || options.url.indexOf('ps_emailalerts') === -1 || options.url.indexOf('process=add') === -1) {
+        function registerMailAlertPrefilter() {
+            if (!window.jQuery || !window.jQuery.ajaxPrefilter) {
+                console.error('Turnstile: jQuery is required for back-in-stock alerts.');
+                return;
+            }
+
+            window.jQuery.ajaxPrefilter(function (options, originalOptions, request) {
+                if (!options.url || (options.type || '').toUpperCase() !== 'POST') {
                     return;
                 }
 
                 var alert = document.querySelector('.js-mailalert');
-                var tokenField = alert && alert.querySelector('input[name="cf-turnstile-response"]');
-                if (!tokenField || !tokenField.value) {
+                var alertUrl = alert && alert.getAttribute('data-url');
+                if (!alertUrl || new URL(options.url, document.baseURI).href !== new URL(alertUrl, document.baseURI).href) {
+                    return;
+                }
+
+                var widget = alert.querySelector('.cf-turnstile');
+                var tokenField = alert.querySelector('input[name="cf-turnstile-response"]');
+                var token = tokenField && tokenField.value;
+                if (!token && tokenField && widget && window.turnstile) {
+                    token = window.turnstile.getResponse(widget);
+                }
+                if (!token) {
                     return;
                 }
 
                 if (typeof options.data === 'string') {
-                    options.data += (options.data ? '&' : '') + 'cf-turnstile-response=' + encodeURIComponent(tokenField.value);
+                    options.data += (options.data ? '&' : '') + 'cf-turnstile-response=' + encodeURIComponent(token);
                 } else if (options.data && typeof options.data === 'object') {
-                    options.data['cf-turnstile-response'] = tokenField.value;
+                    options.data['cf-turnstile-response'] = token;
+                } else {
+                    options.data = 'cf-turnstile-response=' + encodeURIComponent(token);
                 }
+
+                request.always(function () {
+                    if (widget && window.turnstile) {
+                        window.turnstile.reset(widget);
+                    }
+                });
             });
+        }
+
+        if (window.jQuery && window.jQuery.ajaxPrefilter) {
+            registerMailAlertPrefilter();
+        } else if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', registerMailAlertPrefilter);
+        } else {
+            registerMailAlertPrefilter();
         }
     }
 })();

@@ -482,6 +482,11 @@ Then disable the global setting or deselect one form and confirm that form is
 not rejected by Turnstile. Repeat with a valid token and confirm normal
 processing succeeds.
 
+For back-in-stock alerts, also submit an invalid email after completing the
+widget, then correct it and retry after the widget refreshes. The alert should
+be recorded without a duplicate-token error. The JavaScript regression tests can
+be run with `node --test tests/front-mailalert.test.js`.
+
 ---
 
 ## 📧 Email Form Tests
