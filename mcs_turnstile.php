@@ -143,51 +143,74 @@ class Mcs_Turnstile extends Module
 
     private function renderConfigurationForm()
     {
+        $inputs = [
+            [
+                'type' => 'switch',
+                'label' => $this->l('Enable Turnstile'),
+                'name' => self::ENABLED_CONFIG,
+                'is_bool' => true,
+                'values' => [
+                    [
+                        'id' => 'active_on',
+                        'value' => 1,
+                        'label' => $this->l('Yes'),
+                    ],
+                    [
+                        'id' => 'active_off',
+                        'value' => 0,
+                        'label' => $this->l('No'),
+                    ],
+                ],
+            ],
+            [
+                'type' => 'text',
+                'label' => $this->l('Site Key'),
+                'name' => self::SITE_KEY_CONFIG,
+                'required' => true,
+                'hint' => $this->l('Get your Site Key from Cloudflare Dashboard'),
+            ],
+            [
+                'type' => 'text',
+                'label' => $this->l('Secret Key'),
+                'name' => self::SECRET_KEY_CONFIG,
+                'required' => true,
+                'hint' => $this->l('Get your Secret Key from Cloudflare Dashboard'),
+            ],
+        ];
+
+        foreach ($this->getAvailableForms() as $formKey => $formName) {
+            $inputs[] = [
+                'type' => 'switch',
+                'label' => $formName,
+                'name' => 'form_' . $formKey,
+                'is_bool' => true,
+                'values' => [
+                    [
+                        'id' => 'form_' . $formKey . '_on',
+                        'value' => 1,
+                        'label' => $this->l('Yes'),
+                    ],
+                    [
+                        'id' => 'form_' . $formKey . '_off',
+                        'value' => 0,
+                        'label' => $this->l('No'),
+                    ],
+                ],
+            ];
+        }
+
         $fields = [
             'form' => [
                 'legend' => [
                     'title' => $this->l('Cloudflare Turnstile Configuration'),
                 ],
-                'input' => [
-                    [
-                        'type' => 'switch',
-                        'label' => $this->l('Enable Turnstile'),
-                        'name' => self::ENABLED_CONFIG,
-                        'is_bool' => true,
-                        'values' => [
-                            [
-                                'id' => 'active_on',
-                                'value' => 1,
-                                'label' => $this->l('Yes'),
-                            ],
-                            [
-                                'id' => 'active_off',
-                                'value' => 0,
-                                'label' => $this->l('No'),
-                            ],
-                        ],
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->l('Site Key'),
-                        'name' => self::SITE_KEY_CONFIG,
-                        'required' => true,
-                        'hint' => $this->l('Get your Site Key from Cloudflare Dashboard'),
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->l('Secret Key'),
-                        'name' => self::SECRET_KEY_CONFIG,
-                        'required' => true,
-                        'hint' => $this->l('Get your Secret Key from Cloudflare Dashboard'),
-                    ],
-                ],
+                'input' => $inputs,
                 'tabs' => [
                     'forms' => $this->l('Protected Forms'),
                 ],
-            ],
-            'submit' => [
-                'title' => $this->l('Save'),
+                'submit' => [
+                    'title' => $this->l('Save'),
+                ],
             ],
         ];
 
@@ -215,36 +238,7 @@ class Mcs_Turnstile extends Module
             $helper->fields_value['form_' . $formKey] = $formsConfig[$formKey] ?? 0;
         }
 
-        $output = $helper->generateForm([$fields]);
-        $output .= $this->renderFormsConfiguration();
-
-        return $output;
-    }
-
-    private function renderFormsConfiguration()
-    {
-        $html = '<div class="panel" style="margin-top: 20px;">';
-        $html .= '<div class="panel-heading"><i class="icon-cogs"></i> ' . $this->l('Select Forms to Protect') . '</div>';
-        $html .= '<form method="post" action="' . AdminController::$currentIndex . '&configure=' . $this->name . '&token=' . Tools::getAdminTokenLite('AdminModules') . '">';
-        $html .= '<div class="form-group">';
-
-        $formsConfig = json_decode(Configuration::get(self::FORMS_CONFIG), true) ?? [];
-
-        foreach ($this->getAvailableForms() as $formKey => $formName) {
-            $checked = isset($formsConfig[$formKey]) && $formsConfig[$formKey] ? 'checked' : '';
-            $html .= '<div class="checkbox">';
-            $html .= '<label>';
-            $html .= '<input type="checkbox" name="form_' . $formKey . '" value="1" ' . $checked . '> ';
-            $html .= htmlspecialchars($formName);
-            $html .= '</label>';
-            $html .= '</div>';
-        }
-
-        $html .= '</div>';
-        $html .= '</form>';
-        $html .= '</div>';
-
-        return $html;
+        return $helper->generateForm([$fields]);
     }
 
     private function getAvailableForms()
