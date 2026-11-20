@@ -23,7 +23,7 @@ class Mcs_Turnstile extends Module
         $this->name = 'mcs_turnstile';
         $this->tab = 'security';
         $this->version = '1.0.0';
-        $this->author = 'MCS - Multicreations Services';
+        $this->author = 'MCS - Mcitys';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = ['min' => '8.0.0', 'max' => _PS_VERSION_];
         $this->controllers = ['validation'];
@@ -203,7 +203,6 @@ class Mcs_Turnstile extends Module
         $helper->title = $this->displayName;
         $helper->show_toolbar = true;
         $helper->toolbar_scroll = true;
-        $helper->ps_back_url = AdminController::$currentIndex . '&configure=' . $this->name . '&token=' . Tools::getAdminTokenLite('AdminModules');
 
         $helper->fields_value = [
             self::ENABLED_CONFIG => Configuration::get(self::ENABLED_CONFIG),
@@ -260,7 +259,7 @@ class Mcs_Turnstile extends Module
         ];
     }
 
-    public function isEnabled()
+    public function isTurnstileEnabled()
     {
         return (int)Configuration::get(self::ENABLED_CONFIG) === 1;
     }
@@ -272,7 +271,7 @@ class Mcs_Turnstile extends Module
 
     public function displayCustomerAccountFormTop()
     {
-        if (!$this->isEnabled()) {
+        if (!$this->isTurnstileEnabled()) {
             return '';
         }
 
@@ -286,7 +285,7 @@ class Mcs_Turnstile extends Module
 
     public function displayCustomerAccountForm()
     {
-        if (!$this->isEnabled()) {
+        if (!$this->isTurnstileEnabled()) {
             return '';
         }
 
@@ -300,7 +299,7 @@ class Mcs_Turnstile extends Module
 
     public function displayLoginFormContent()
     {
-        if (!$this->isEnabled()) {
+        if (!$this->isTurnstileEnabled()) {
             return '';
         }
 
@@ -314,7 +313,7 @@ class Mcs_Turnstile extends Module
 
     public function displayCustomerRegisterFormTop()
     {
-        if (!$this->isEnabled()) {
+        if (!$this->isTurnstileEnabled()) {
             return '';
         }
 
@@ -328,7 +327,7 @@ class Mcs_Turnstile extends Module
 
     public function displayContactForm()
     {
-        if (!$this->isEnabled()) {
+        if (!$this->isTurnstileEnabled()) {
             return '';
         }
 
@@ -342,7 +341,7 @@ class Mcs_Turnstile extends Module
 
     public function displayBeforeBodyClosingTag()
     {
-        if (!$this->isEnabled()) {
+        if (!$this->isTurnstileEnabled()) {
             return '';
         }
 
@@ -351,7 +350,7 @@ class Mcs_Turnstile extends Module
 
     public function displayProductExtraContent()
     {
-        if (!$this->isEnabled()) {
+        if (!$this->isTurnstileEnabled()) {
             return '';
         }
 

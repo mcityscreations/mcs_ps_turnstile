@@ -16,9 +16,9 @@ class TurnstileHelper
     /**
      * Check if Turnstile is enabled
      */
-    public function isEnabled()
+    public function isTurnstileEnabled()
     {
-        return $this->module->isEnabled();
+        return $this->module->isTurnstileEnabled();
     }
 
     /**
@@ -26,7 +26,7 @@ class TurnstileHelper
      */
     public function isFormProtected($formKey)
     {
-        if (!$this->isEnabled()) {
+        if (!$this->isTurnstileEnabled()) {
             return false;
         }
 
