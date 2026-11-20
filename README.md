@@ -71,7 +71,7 @@ Add Turnstile to custom forms:
 
 ```php
 $module = Module::getInstanceByName('mcs_turnstile');
-if ($module && $module->isEnabled()) {
+if ($module && Module::isEnabled('mcs_turnstile')) {
     $helper = new TurnstileHelper($module);
     echo $helper->getWidgetHtml();
     

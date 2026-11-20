@@ -232,7 +232,7 @@ To protect custom forms, add validation in your form handler:
 
 ```php
 $module = Module::getInstanceByName('mcs_turnstile');
-if ($module && $module->isEnabled()) {
+if ($module && Module::isEnabled('mcs_turnstile')) {
     if (!Mcs_Turnstile::validateTurnstile()) {
         $this->errors[] = 'CAPTCHA verification failed';
         return false;

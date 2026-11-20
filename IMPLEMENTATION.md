@@ -229,7 +229,7 @@ If you have a custom form in a custom module:
 <?php
 // At top of your form validation
 $turnstile = Module::getInstanceByName('mcs_turnstile');
-if ($turnstile && $turnstile->isEnabled()) {
+if ($turnstile && Module::isEnabled('mcs_turnstile')) {
     // Add Turnstile widget to form
     $turnstileHelper = new TurnstileHelper($turnstile);
     echo $turnstileHelper->getWidgetHtml();
@@ -284,7 +284,7 @@ Add to your custom module or theme:
 public function hookDisplayMyCustomForm()
 {
     $turnstile = Module::getInstanceByName('mcs_turnstile');
-    if ($turnstile && $turnstile->isEnabled()) {
+    if ($turnstile && Module::isEnabled('mcs_turnstile')) {
         return $turnstile->renderTurnstileWidget();
     }
     return '';

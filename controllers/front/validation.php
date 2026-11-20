@@ -16,7 +16,7 @@ class Mcs_TurnstileValidationModuleFrontController extends ModuleFrontController
             $module = Module::getInstanceByName('mcs_turnstile');
             $formKey = Tools::getValue('form');
             $result = $module
-                && $module->isEnabled()
+                && Module::isEnabled('mcs_turnstile')
                 && $module->isFormProtected($formKey)
                 && Mcs_Turnstile::validateTurnstile();
 

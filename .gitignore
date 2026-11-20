@@ -26,9 +26,6 @@ composer.lock
 var/cache/*
 var/logs/*
 var/sessions/*
-override/*
-!override/classes/form/
-
 # Testing
 phpunit.xml
 .phpunit.result.cache
