@@ -219,7 +219,12 @@ class Mcs_Turnstile extends Module
         $helper->name_controller = $this->name;
         $helper->identifier = $this->identifier;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
-        $helper->currentIndex = AdminController::$currentIndex;
+        $helper->currentIndex = $this->context->link->getAdminLink(
+            'AdminModules',
+            false,
+            [],
+            ['configure' => $this->name]
+        );
         $helper->submit_action = 'submit' . $this->name;
         $helper->default_form_language = (int)Configuration::get('PS_LANG_DEFAULT');
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG');
