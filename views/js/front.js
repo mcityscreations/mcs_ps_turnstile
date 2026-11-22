@@ -104,7 +104,20 @@
                     options.data = 'cf-turnstile-response=' + encodeURIComponent(token);
                 }
 
-                request.always(function () {
+                request.always(function (response, status) {
+                    if (status === 'success') {
+                        if (typeof response === 'string') {
+                            try {
+                                response = JSON.parse(response);
+                            } catch (error) {
+                                console.error('Turnstile: invalid back-in-stock alert response.');
+                            }
+                        }
+                        if (response && response.error === false) {
+                            return;
+                        }
+                    }
+
                     if (widget && window.turnstile) {
                         window.turnstile.reset(widget);
                     }

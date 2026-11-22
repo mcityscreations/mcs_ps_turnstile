@@ -66,13 +66,13 @@ function setup(options = {}) {
         send(requestOptions) {
             let complete;
             prefilter(requestOptions, {}, { always(callback) { complete = callback; } });
-            return () => { if (complete) complete(); };
+            return (response, status = 'success') => { if (complete) complete(response, status); };
         },
         resets() { return resets; },
     };
 }
 
-test('forwards the widget token to the exact alert URL and refreshes it after the request', () => {
+test('forwards the widget token without running another challenge after a successful alert', () => {
     const app = setup({ apiToken: 'token+value' });
     const request = {
         type: 'POST',
@@ -81,8 +81,29 @@ test('forwards the widget token to the exact alert URL and refreshes it after th
     };
     const complete = app.send(request);
     assert.equal(request.data, 'id_product=1&cf-turnstile-response=token%2Bvalue');
-    complete();
-    assert.equal(app.resets(), 1);
+    complete('{"error":false,"message":"registered"}');
+    assert.equal(app.resets(), 0);
+});
+
+test('refreshes the consumed token after an alert error or transport failure', () => {
+    for (const [response, status] of [
+        ['{"error":true}', 'success'],
+        [{ error: true }, 'success'],
+        [{}, 'error'],
+        ['not JSON', 'success'],
+    ]) {
+        const app = setup({ hiddenToken: 'hidden-token' });
+        const request = { type: 'POST', url: '/custom/alert?process=add', data: 'id_product=1' };
+        app.send(request)(response, status);
+        assert.equal(app.resets(), 1);
+    }
+});
+
+test('does not refresh the token for a parsed successful alert response', () => {
+    const app = setup({ hiddenToken: 'hidden-token' });
+    const request = { type: 'POST', url: '/custom/alert?process=add', data: 'id_product=1' };
+    app.send(request)({ error: false }, 'success');
+    assert.equal(app.resets(), 0);
 });
 
 test('registers the prefilter when jQuery loads before DOMContentLoaded', () => {

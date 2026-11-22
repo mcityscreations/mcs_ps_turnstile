@@ -76,6 +76,8 @@ The integration script targets the Classic theme's login, registration,
 password-reset, contact, newsletter, and back-in-stock form markup. The
 `ps_emailalerts` back-in-stock request is AJAX-based; the script forwards its
 token and the dispatcher hook verifies it before the module processes the request.
+The widget is reset after a failed request so the customer can retry with a new
+single-use token, but not after a successful alert registration.
 
 ## Data Flow
 
