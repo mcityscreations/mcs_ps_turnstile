@@ -64,51 +64,7 @@ class TurnstileHelper
      */
     public function validateToken()
     {
-        $token = Tools::getValue('cf-turnstile-response');
-
-        if (empty($token)) {
-            return false;
-        }
-
-        $secretKey = Configuration::get(Mcs_Turnstile::SECRET_KEY_CONFIG);
-        if (empty($secretKey)) {
-            return false;
-        }
-
-        return $this->verifyToken($token, $secretKey);
-    }
-
-    /**
-     * Verify token with Cloudflare API
-     */
-    private function verifyToken($token, $secretKey)
-    {
-        $url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
-
-        $data = [
-            'secret' => $secretKey,
-            'response' => $token,
-        ];
-
-        $options = [
-            'http' => [
-                'method' => 'POST',
-                'header' => 'Content-Type: application/x-www-form-urlencoded',
-                'content' => http_build_query($data),
-                'timeout' => 10,
-            ],
-        ];
-
-        $context = stream_context_create($options);
-        $response = @file_get_contents($url, false, $context);
-
-        if ($response === false) {
-            return false;
-        }
-
-        $result = json_decode($response, true);
-
-        return isset($result['success']) && $result['success'] === true;
+        return Mcs_Turnstile::validateTurnstile();
     }
 
     /**

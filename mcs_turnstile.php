@@ -284,9 +284,8 @@ class Mcs_Turnstile extends Module
     {
         if (
             strtoupper($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST'
-            || !Tools::isSubmit('submitNewsletter')
             || !isset($params['action'])
-            || (int)$params['action'] !== 0
+            || (string)$params['action'] !== '0'
             || !$this->isFormProtected('newsletter')
         ) {
             return;
@@ -493,12 +492,14 @@ class Mcs_Turnstile extends Module
     {
         $token = Tools::getValue('cf-turnstile-response');
 
-        if (empty($token)) {
+        if (!is_string($token) || $token === '' || strlen($token) > 2048) {
             return false;
         }
 
         $secretKey = Configuration::get(self::SECRET_KEY_CONFIG);
-        if (empty($secretKey)) {
+        if (!is_string($secretKey) || $secretKey === '') {
+            PrestaShopLogger::addLog('Turnstile: Siteverify secret key is missing.', 3);
+
             return false;
         }
 
@@ -509,28 +510,67 @@ class Mcs_Turnstile extends Module
     {
         $url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
-        $data = [
+        $data = http_build_query([
             'secret' => $secretKey,
             'response' => $token,
-        ];
+        ]);
 
-        $options = [
-            'http' => [
-                'method' => 'POST',
-                'header' => 'Content-Type: application/x-www-form-urlencoded',
-                'content' => http_build_query($data),
-            ],
-        ];
+        if (function_exists('curl_init')) {
+            $handle = curl_init($url);
+            if ($handle === false) {
+                PrestaShopLogger::addLog('Turnstile: could not initialize Siteverify request.', 3);
 
-        $context = stream_context_create($options);
-        $response = @file_get_contents($url, false, $context);
+                return false;
+            }
+            curl_setopt_array($handle, [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $data,
+                CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_TIMEOUT => 10,
+            ]);
+            $response = curl_exec($handle);
+            $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+            curl_close($handle);
+            if ($response === false || $status !== 200) {
+                PrestaShopLogger::addLog('Turnstile: Siteverify request failed (HTTP ' . (int)$status . ').', 3);
+
+                return false;
+            }
+        } else {
+            $options = [
+                'http' => [
+                    'method' => 'POST',
+                    'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+                    'content' => $data,
+                    'timeout' => 10,
+                ],
+            ];
+            $context = stream_context_create($options);
+            $response = @file_get_contents($url, false, $context);
+        }
 
         if ($response === false) {
+            PrestaShopLogger::addLog('Turnstile: Siteverify request failed; check HTTPS connectivity and PHP configuration.', 3);
+
             return false;
         }
 
         $result = json_decode($response, true);
+        if (!is_array($result) || !isset($result['success']) || !is_bool($result['success'])) {
+            PrestaShopLogger::addLog('Turnstile: Siteverify returned an invalid response.', 3);
 
-        return isset($result['success']) && $result['success'] === true;
+            return false;
+        }
+
+        $errors = isset($result['error-codes']) && is_array($result['error-codes']) ? $result['error-codes'] : [];
+        foreach (['missing-input-secret', 'invalid-input-secret', 'internal-error', 'bad-request'] as $error) {
+            if (in_array($error, $errors, true)) {
+                PrestaShopLogger::addLog('Turnstile: Siteverify error: ' . $error . '.', 3);
+            }
+        }
+
+        return $result['success'] === true;
     }
 }

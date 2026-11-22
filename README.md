@@ -98,8 +98,15 @@ if ($module && Module::isEnabled('mcs_turnstile')) {
 
 **Verification fails?**
 - Confirm Site Key and Secret Key
-- Check server can reach Cloudflare API
-- Review Prestashop error logs
+- Check that PHP can reach `https://challenges.cloudflare.com/turnstile/v0/siteverify`
+  over HTTPS using cURL or, if cURL is unavailable, `allow_url_fopen`
+- Review PrestaShop logs for messages beginning with `Turnstile:`
+- Confirm the module is enabled, the form is selected, and the installed hooks
+  and overrides are active; clear the PrestaShop cache after upgrading
+
+The widget alone does not call Siteverify: submit a protected form with a
+completed widget to trigger validation. Cloudflare tokens are single-use; do not
+pre-validate a token using the validation endpoint before submitting the form.
 
 See [IMPLEMENTATION.md](IMPLEMENTATION.md#troubleshooting-guide) for detailed solutions.
 

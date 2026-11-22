@@ -97,29 +97,15 @@ Accept the submission or return a form-specific error before processing
 
 ### Token Validation
 
-```php
-// 1. Extract token from POST
-$token = Tools::getValue('cf-turnstile-response');
+`Mcs_Turnstile::validateTurnstile()` sends the submitted token and configured
+secret to Cloudflare Siteverify. It uses PHP cURL when available, otherwise
+HTTPS streams, with a 10-second timeout. Missing or invalid tokens, failed
+requests, malformed responses, and responses without `success: true` are
+rejected. Configuration and transport errors are recorded in PrestaShop logs
+without logging keys or tokens. The helper uses the same validation path.
 
-// 2. Get secret key from config
-$secretKey = Configuration::get(self::SECRET_KEY_CONFIG);
-
-// 3. Send to Cloudflare verification endpoint
-$response = file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', 
-    false, stream_context_create([
-        'http' => [
-            'method' => 'POST',
-            'content' => http_build_query([
-                'secret' => $secretKey,
-                'response' => $token
-            ])
-        ]
-    ]));
-
-// 4. Verify success flag
-$result = json_decode($response, true);
-return $result['success'] === true;
-```
+The standalone validation endpoint consumes the token. Do not call it before
+submitting a protected form: Cloudflare tokens are single-use.
 
 ### Key Storage
 

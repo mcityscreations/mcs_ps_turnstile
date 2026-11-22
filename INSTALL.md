@@ -116,7 +116,7 @@ You can selectively protect the following forms:
 ## Performance Impact
 
 - **Frontend**: Minimal - Turnstile loads asynchronously
-- **Backend**: Negligible - Token verification is fast and cached
+- **Backend**: Each protected submission requires a Siteverify request
 - **SEO**: No impact - Turnstile tokens not indexed
 - **Page Load**: <100ms additional validation time
 
@@ -128,14 +128,18 @@ You can selectively protect the following forms:
    - Site Key must match in both config and Cloudflare dashboard
    - Secret Key must be exact match (copy from Cloudflare)
 
-2. **Check Network**: Ensure server can reach Cloudflare API
-   - Test: `curl https://challenges.cloudflare.com/turnstile/v0/api.js`
+2. **Check Network**: Ensure PHP can reach `https://challenges.cloudflare.com/turnstile/v0/siteverify` over HTTPS.
+   The module uses PHP cURL when available, otherwise HTTPS streams require `allow_url_fopen`.
 
 3. **Check Configuration**: Verify module is enabled
    - Go to Module Manager and check status
 
-4. **Check Logs**: Review Prestashop error logs
-   - Location: `/var/log/prestashop.log`
+4. **Check Logs**: Look for `Turnstile:` messages in PrestaShop logs. They report
+   configuration, transport, and malformed-response errors without recording keys or tokens.
+
+Siteverify is called when a protected form is submitted, not when the widget
+is merely displayed. Tokens are single-use: do not validate one separately before
+submitting the form.
 
 ### Widget Not Displaying
 
